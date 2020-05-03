@@ -1,11 +1,14 @@
 package tk.solex.api.model;
 
+import jdk.nashorn.internal.objects.annotations.Getter;
+import jdk.nashorn.internal.objects.annotations.Setter;
+
 import javax.persistence.*;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user")
-
 public class User {
 
     @Id
@@ -20,6 +23,7 @@ public class User {
 
     @ManyToOne
     private Role role;
+
 
     public long getId() {
         return id;
@@ -69,4 +73,11 @@ public class User {
         this.signupDateTime = signupDateTime;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }

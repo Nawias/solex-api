@@ -2,6 +2,7 @@ package tk.solex.api.model;
 
 import javax.persistence.*;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "role")
@@ -16,19 +17,5 @@ public class Role {
     @ManyToMany
     private Set<Permission> permissions;
 
-    public long getId() {
-        return Id;
-    }
 
-    public void setId(long id) {
-        Id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }

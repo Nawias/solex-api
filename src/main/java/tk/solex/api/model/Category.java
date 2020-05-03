@@ -1,6 +1,8 @@
 package tk.solex.api.model;
 
 import javax.persistence.*;
+import java.util.UUID;
+
 @Entity
 @Table(name="category")
 public class Category {
@@ -12,27 +14,5 @@ public class Category {
 
     private long parentId;
 
-    public long getId() {
-        return Id;
-    }
 
-    public void setId(long id) {
-        Id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public long getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(long parentId) {
-        this.parentId = parentId;
-    }
 }
