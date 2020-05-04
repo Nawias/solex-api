@@ -1,17 +1,58 @@
 package tk.solex.api.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import tk.solex.api.dao.AdvertisementDAO;
+import tk.solex.api.model.Advertisement;
+import tk.solex.api.service.FileStorageService;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 public class AdvertisementController {
-    @RequestMapping("/nowe-ogloszenie")
+
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
+    private AdvertisementDAO advertisementDAO;
+
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @GetMapping("/nowe-ogloszenie")
     public String newAd() {
         return "<html><h1>New Ad Page</h1></html>";
     }
 
-    @RequestMapping("/edytuj-ogloszenie")
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @GetMapping("/edytuj-ogloszenie")
     public String editAd() {
         return "<html><h1>Edit Ad Page</h1></html>";
+    }
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @RequestMapping(value = "/nowe-ogloszenie",method = RequestMethod.POST, consumes = {"multipart/form-data"})
+    public String newAd(@RequestParam("model") String model, @RequestParam("file") MultipartFile file) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Advertisement advertisement = mapper.readValue(model, Advertisement.class);
+
+        String photos = "[";
+
+
+        try {
+            photos += fileStorageService.upload(file) + "]";
+        } catch (IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return "Failed to upload the file";
+        }
+        advertisement.setPhotos(photos);
+        advertisementDAO.save(advertisement);
+        return "Uploaded";
     }
 }
