@@ -38,7 +38,7 @@ public class AdvertisementController {
 
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @RequestMapping(value = "/nowe-ogloszenie",method = RequestMethod.POST, consumes = {"multipart/form-data"})
-    public String newAd(@RequestParam("model") String model, @RequestParam("file") MultipartFile file) throws IOException {
+    public String newAd(@RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Advertisement advertisement = mapper.readValue(model, Advertisement.class);
 
@@ -46,7 +46,13 @@ public class AdvertisementController {
 
 
         try {
-            photos += fileStorageService.upload(file) + "]";
+            for(MultipartFile file : files) {
+                if(photos.equals("["))
+                    photos += fileStorageService.upload(file);
+                else
+                    photos += "," + fileStorageService.upload(file);
+            }
+            photos += "]";
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
             return "Failed to upload the file";

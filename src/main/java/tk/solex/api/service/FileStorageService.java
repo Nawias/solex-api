@@ -23,7 +23,7 @@ public class FileStorageService {
             throw new IOException("File was empty");
         }
         MessageDigest md = MessageDigest.getInstance("MD5");
-        String timestamp = "" + Instant.now().getEpochSecond();
+        String timestamp = file.getOriginalFilename() + Instant.now().getEpochSecond();
 
         md.update(timestamp.getBytes());
         byte[] digest = md.digest();
