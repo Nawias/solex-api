@@ -14,8 +14,8 @@ public class Role {
 
     private String name;
 
-    @ManyToMany
+  /*  @ManyToMany
     private Set<Permission> permissions;
-
+*/
 
 }
