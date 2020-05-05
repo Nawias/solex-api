@@ -1,6 +1,7 @@
 package tk.solex.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tk.solex.api.dao.RoleDAO;
 import tk.solex.api.dao.UserDAO;
@@ -27,7 +28,8 @@ public class UserController {
         dao.save(user);
         return "User "+user.getUsername()+" saved";
     }
-    @GetMapping("/getAll")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping("/secured/getAll")
     public List<User> getUsers() {
         return (List<User>) dao.findAll();
     }

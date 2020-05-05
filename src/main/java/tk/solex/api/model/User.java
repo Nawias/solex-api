@@ -24,6 +24,26 @@ public class User {
     @ManyToOne
     private Role role;
 
+    public User(){}
+
+    public User(String email, String username, String passwordHash, String address, Date signupDateTime, Role role) {
+        this.email = email;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.address = address;
+        this.signupDateTime = signupDateTime;
+        this.role = role;
+    }
+
+    public User(User user) {
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.role = user.getRole();
+        this.passwordHash = user.getPasswordHash();
+        this.address = user.getAddress();
+        this.signupDateTime = user.getSignupDateTime();
+    }
 
     public long getId() {
         return id;
