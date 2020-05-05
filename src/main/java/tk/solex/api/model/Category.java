@@ -12,7 +12,31 @@ public class Category {
 
     private String name;
 
-    private long parentId;
+    @ManyToOne(optional = true)
+    private Category parent;
 
 
+    public long getId() {
+        return Id;
+    }
+
+    public void setId(long id) {
+        Id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Category getParent() {
+        return parent;
+    }
+
+    public void setParent(Category parent) {
+        this.parent = parent;
+    }
 }

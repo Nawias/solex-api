@@ -2,8 +2,6 @@ package tk.solex.api.model;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name="advertisement")
@@ -22,7 +20,7 @@ public class Advertisement {
 
     private String status;
 
-    private Date DateTime;
+    private Date dateTime;
 
     @ManyToOne
     private User user;
@@ -79,11 +77,11 @@ public class Advertisement {
     }
 
     public Date getDateTime() {
-        return DateTime;
+        return dateTime;
     }
 
     public void setDateTime(Date dateTime) {
-        DateTime = dateTime;
+        this.dateTime = dateTime;
     }
 
     public User getUser() {
@@ -92,6 +90,20 @@ public class Advertisement {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"title\":\"" + title + '\"' +
+                ", \"description\":\"" + description + '\"' +
+                ", \"photos\":\"" + photos + '\"' +
+                ", \"phone\":\"" + phone + '\"' +
+                ", \"status\":\"" + status + '\"' +
+                ", \"dateTime\":" + dateTime +
+                ", \"userId\":" + user.getId() +
+                ", \"categoryId\":" + category.getId() +
+                '}';
     }
 
     public Category getCategory() {
