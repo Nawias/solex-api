@@ -18,8 +18,10 @@ import tk.solex.api.service.FileStorageService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 
@@ -53,11 +55,44 @@ public class AdvertisementController {
     }
 
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @PutMapping("/edytuj-ogloszenie")
+    public String editAd(HttpServletRequest request, @RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException
+    {
+        Advertisement advertisement = getAdvertisementFromModel(model);
+        Advertisement oldAd = advertisementDAO.getOne(advertisement.getId());
+        advertisement.setDateTime(oldAd.getDateTime());
+        try {
+            advertisement.setPhotos(uploadPhotos(files));
+            removeOldPhotos(oldAd.getPhotos());
+        } catch (IOException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return "Failed to upload the file";
+        }
+        advertisement.setUser(getUser(request));
+        advertisement.setCategory(getCategoryFromJson(model));
+
+        advertisementDAO.save(advertisement);
+        return "Updated";
+    }
+
+    private void removeOldPhotos(String photos) throws IOException {
+        JSONParser parser = new JSONParser(photos);
+        ArrayList<Object> messageJson = null;
+        try {
+            messageJson = parser.parseArray();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        for (Object file : messageJson) {
+            fileStorageService.delete((String)file);
+        }
+    }
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @ResponseBody
     @RequestMapping(value = "/nowe-ogloszenie",method = RequestMethod.POST, consumes = {"multipart/form-data"})
     public String newAd(HttpServletRequest request, @RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Advertisement advertisement = mapper.readValue(model, Advertisement.class);
+        Advertisement advertisement = getAdvertisementFromModel(model);
         try {
             advertisement.setPhotos(uploadPhotos(files));
         } catch (IOException | NoSuchAlgorithmException e) {
@@ -71,13 +106,18 @@ public class AdvertisementController {
         return "Uploaded";
     }
 
+    private Advertisement getAdvertisementFromModel(@RequestParam("model") String model) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(model, Advertisement.class);
+    }
+
     private String uploadPhotos(MultipartFile[] files)throws IOException,NoSuchAlgorithmException{
         String photos = "[";
         for(MultipartFile file : files) {
             if(photos.equals("["))
-                photos += fileStorageService.upload(file);
+                photos += "\"" + fileStorageService.upload(file) + "\"";
             else
-                photos += "," + fileStorageService.upload(file);
+                photos += ", \"" + fileStorageService.upload(file)+ "\"";
         }
         photos += "]";
         return photos;
@@ -97,6 +137,7 @@ public class AdvertisementController {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return categoryDAO.getOne((Long)messageJson.get("categoryId"));
+        BigInteger id = (BigInteger)messageJson.get("categoryId");
+        return categoryDAO.getOne(id.longValue());
     }
 }

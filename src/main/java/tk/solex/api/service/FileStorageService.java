@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import javax.xml.bind.DatatypeConverter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -17,6 +18,10 @@ import java.time.Instant;
 public class FileStorageService {
     @Value("${upload.path}")
     private String path;
+
+    public void delete(String fileName) throws IOException {
+        Files.delete( Paths.get(fileName));
+    }
 
     public String upload(MultipartFile file) throws IOException, NoSuchAlgorithmException {
         if(file.isEmpty()) {

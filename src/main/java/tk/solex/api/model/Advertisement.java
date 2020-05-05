@@ -1,8 +1,11 @@
 package tk.solex.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.util.Date;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name="advertisement")
 public class Advertisement {
