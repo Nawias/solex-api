@@ -24,6 +24,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Optional;
+import java.util.List;
 
 @RestController
 public class AdvertisementController {
@@ -37,6 +38,14 @@ public class AdvertisementController {
     private UserDAO userDAO;
     @Autowired
     private CategoryDAO categoryDAO;
+
+
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @GetMapping("/nowe-ogloszenie")
+    public List<Advertisement> allUsersAds(HttpServletRequest request) {
+        return advertisementDAO.findAdvertisementsByUser(getUser(request));
+    }
 
 
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
