@@ -40,7 +40,6 @@ public class ConversationController {
     public String conversationPage() {
         return "<html><h1>Conversation Page</h1></html>";
     }
-
     /**
      * Metoda pozwalająca na utworzenie nowej konwersacji
      * @param json JSON zawierający wszystkie niezbędne dane do utworzenia nowej konwersacji
