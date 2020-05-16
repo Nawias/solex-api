@@ -40,7 +40,12 @@ public class ConversationController {
     public String conversationPage() {
         return "<html><h1>Conversation Page</h1></html>";
     }
-
+    /**
+     * Metoda pozwalająca na utworzenie nowej konwersacji
+     * @param json JSON zawierający wszystkie niezbędne dane do utworzenia nowej konwersacji
+     * @param request
+     * @return komunikat informujący czy udało się utworzyć nową konwersację
+     */
     @PostMapping("/nowa-konwersacja")
     public String newConversation(@RequestBody String json, HttpServletRequest request) {
         try {
@@ -58,6 +63,12 @@ public class ConversationController {
         return "konwersacja utworzona";
     }
 
+    /**
+     * Metoda pozwalająca na wysłanie nowej wiadomości
+     * @param json JSON zawierający wszystkie niezbędne dane do wysłania nowej wiadomości
+     * @param request
+     * @return komunikat informujący czy udało się wysłać wiadomość
+     */
     @PostMapping("/nowa-wiadomosc")
     public String newMessage(@RequestBody String json, HttpServletRequest request) {
 
@@ -79,6 +90,11 @@ public class ConversationController {
         return "wiadomość została wysłana";
     }
 
+    /**
+     * Metoda zwracająca aktualnie zalogowanego użytkownika.
+     * @param request
+     * @return aktualnie zalogowany użytkownik
+     */
     private User getUser(HttpServletRequest request) {
         Principal principal = request.getUserPrincipal();
         Optional<User> optionalUser = userDAO.findByUsername(principal.getName());
