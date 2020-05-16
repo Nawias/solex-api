@@ -24,7 +24,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Optional;
-import java.util.List;
 
 @RestController
 public class AdvertisementController {
@@ -39,22 +38,21 @@ public class AdvertisementController {
     @Autowired
     private CategoryDAO categoryDAO;
 
-
-
-    @PreAuthorize("hasAnyRole('USER,ADMIN')")
-    @GetMapping("/nowe-ogloszenie")
-    public List<Advertisement> allUsersAds(HttpServletRequest request) {
-        return advertisementDAO.findAdvertisementsByUser(getUser(request));
-    }
-
-
+    /**
+     *
+     * @return
+     */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @GetMapping("/nowe-ogloszenie")
     public String newAd() {
         return "<html><h1>New Ad Page</h1></html>";
     }
 
-
+    /**
+     *
+     * @param id
+     * @return
+     */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @GetMapping("/edytuj-ogloszenie")
     public String editAd(@RequestParam Long id) {
@@ -63,6 +61,14 @@ public class AdvertisementController {
                 +"</body></html>";
     }
 
+    /**
+     * Metoda pozwalająca na edytowanie istniejącego ogłoszenia
+     * @param request
+     * @param model JSON zawierający zedytowane dane ogłoszenia
+     * @param files pliki zawierające zdjęcia do ogłoszenia
+     * @return Komunikat informujący czy udało się przeprowadzić edycję
+     * @throws IOException
+     */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @PutMapping("/edytuj-ogloszenie")
     public String editAd(HttpServletRequest request, @RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException
@@ -84,6 +90,11 @@ public class AdvertisementController {
         return "Updated";
     }
 
+    /**
+     * Metoda usuwająca stare zdjęcia z ogłoszenia
+     * @param photos nazwy plików ze zdjęciami
+     * @throws IOException
+     */
     private void removeOldPhotos(String photos) throws IOException {
         JSONParser parser = new JSONParser(photos);
         ArrayList<Object> messageJson = null;
@@ -97,6 +108,14 @@ public class AdvertisementController {
         }
     }
 
+    /**
+     * Metoda pozwalająca na dodanie nowego ogłoszenia
+     * @param request
+     * @param model JSON zawierający dane potrzebne do utworzenia nowego ogłoszenia
+     * @param files pliki ze zdjęciami do ogłoszenia
+     * @return Komunikat informujacy czy udało się dodać nowe ogłosznie
+     * @throws IOException Wyjątek związany z przesyłaniem plików
+     */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @ResponseBody
     @RequestMapping(value = "/nowe-ogloszenie",method = RequestMethod.POST, consumes = {"multipart/form-data"})
@@ -115,11 +134,24 @@ public class AdvertisementController {
         return "Uploaded";
     }
 
+    /**
+     * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
+     * @param model JSON zawierający ogłoszenie
+     * @return obiekt zawierający ogłoszenie
+     * @throws JsonProcessingException
+     */
     private Advertisement getAdvertisementFromModel(@RequestParam("model") String model) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(model, Advertisement.class);
     }
 
+    /**
+     * Metoda zwracająca przesłane zdjęcia
+     * @param files pliki zawierające zdjęcia ogłoszenia
+     * @return pliki ze zdjęciami
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
     private String uploadPhotos(MultipartFile[] files)throws IOException,NoSuchAlgorithmException{
         String photos = "[";
         for(MultipartFile file : files) {
@@ -132,12 +164,22 @@ public class AdvertisementController {
         return photos;
     }
 
+    /**
+     * Metoda zwracająca aktualnie zalogowanego użytkownika.
+     * @param request
+     * @return aktualnie zalogowany użytkownik
+     */
     private User getUser(HttpServletRequest request) {
         Principal principal = request.getUserPrincipal();
         Optional<User> optionalUser = userDAO.findByUsername(principal.getName());
         return optionalUser.get();
     }
 
+    /**
+     * Metoda zwracająca kategorię na podstawie id kategori zawartego w JSON
+     * @param model
+     * @return obiekt odpowiedniej kategorii
+     */
     private Category getCategoryFromJson(@RequestParam("model") String model) {
         JSONParser parser = new JSONParser(model);
         LinkedHashMap<String,Object> messageJson = null;

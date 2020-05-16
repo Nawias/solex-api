@@ -20,6 +20,11 @@ public class UserController {
     @Autowired
     private RoleDAO roleDAO;
 
+    /**
+     * Metoda pozwalająca na dodanie nowego użytkownika
+     * @param user Obiekt zawierający dane nowego użytkownika
+     * @return Komunikat informujący czy udało się dodać użytkownika
+     */
     @PostMapping("/new")
     public String addUser(@RequestBody User user) {
         System.out.println(user.toString());
@@ -28,6 +33,11 @@ public class UserController {
         dao.save(user);
         return "User "+user.getUsername()+" saved";
     }
+
+    /**
+     * Metoda zwracająca wszystkich użytkowników
+     * @return Dane wszystkich użytkowników zapisanych w bazie
+     */
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/secured/getAll")
     public List<User> getUsers() {
