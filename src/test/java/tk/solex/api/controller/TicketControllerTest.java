@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import tk.solex.api.dao.AdvertisementDAO;
@@ -34,20 +35,22 @@ public class TicketControllerTest {
     AdvertisementDAO advertisementDAO;
 
     @Test
+    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
     void closeTicket() throws Exception {
         mockMvc.perform(
                     put("/zamknij-zgloszenie")
-                        .param("id","0")
+                        .param("id","17")
                     )
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
+    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
     void newTicket() throws Exception {
         String model = "{"
                 + "\"description\":\"TestDesc\","
-                + "\"adId\":\"14\","
+                + "\"adId\":14"
                 + "}";
         mockMvc.perform(
                     post("/nowe-zgloszenie")

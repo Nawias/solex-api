@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockBodyContent;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -49,6 +50,7 @@ public class AdvertisementControllerTest {
     CategoryDAO categoryDAO;
 
     @Test
+    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
     void editAd() {
         Path path = Paths.get("src/test/resources/passat.png");
         byte[] content = null;
@@ -75,7 +77,7 @@ public class AdvertisementControllerTest {
         MockMultipartFile photo = new MockMultipartFile("files","passat.png","image/png",content);
 
         try {
-            mockMvc.perform(MockMvcRequestBuilders.multipart("/edytuj-ogloszenie").file(photo).param(obj).with(new RequestPostProcessor() {
+            mockMvc.perform(MockMvcRequestBuilders.multipart("/edytuj-ogloszenie").file(photo).param("model",obj).with(new RequestPostProcessor() {
                 @Override
                 public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
                     request.setMethod("PUT");
@@ -88,6 +90,7 @@ public class AdvertisementControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
     void newAd() {
         Path path = Paths.get("src/test/resources/passat.png");
         byte[] content = null;
@@ -113,7 +116,7 @@ public class AdvertisementControllerTest {
         MockMultipartFile photo = new MockMultipartFile("files","passat.png","image/png",content);
 
         try {
-            mockMvc.perform(MockMvcRequestBuilders.multipart("/nowe-ogloszenie").file(photo).param(obj)).andDo(print()).andExpect(status().isOk());
+            mockMvc.perform(MockMvcRequestBuilders.multipart("/nowe-ogloszenie").file(photo).param("model",obj)).andDo(print()).andExpect(status().isOk());
         } catch (Exception e) {
             e.printStackTrace();
         }
