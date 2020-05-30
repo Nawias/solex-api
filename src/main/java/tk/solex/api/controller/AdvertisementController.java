@@ -23,9 +23,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
 
+
 @RestController
+@RequestMapping("/api")
 public class AdvertisementController {
 
     @Autowired
@@ -134,6 +137,16 @@ public class AdvertisementController {
         return "Uploaded";
     }
 
+
+    @RequestMapping(value = "/szukaj", method = RequestMethod.POST)
+    public /*List<Advertisement>*/ String searchAd(HttpServletRequest request, @RequestParam("query") String query){
+
+        return query;
+
+    }
+
+
+
     /**
      * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
      * @param model JSON zawierający ogłoszenie
@@ -191,4 +204,6 @@ public class AdvertisementController {
         BigInteger id = (BigInteger)messageJson.get("categoryId");
         return categoryDAO.getOne(id.longValue());
     }
+
+
 }
