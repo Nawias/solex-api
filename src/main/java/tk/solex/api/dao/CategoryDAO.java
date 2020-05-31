@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface CategoryDAO extends JpaRepository<Category, Long> {
 
     Optional<Category> findById(Long id);
-    List<Category> findAllById(Long id);
+  //  List<Category> findAllById(Long id);
     List<Category> findByParentIn(List<Category> categories);
 }

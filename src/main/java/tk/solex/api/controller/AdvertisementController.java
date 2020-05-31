@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @RestController
@@ -137,18 +134,24 @@ public class AdvertisementController {
         return "Uploaded";
     }
 
+    /**
+     * Metoda odpowiedzialna za obsługę wyszukiwarki ogłoszeń
+     * @param request request
+     * @param query JSON zawierający pola "query" czyli szukaną frazę oraz "categoryId"
+     * @return Lista znalezionych ogłoszeń
+     */
     @ResponseBody
     @RequestMapping(value = "/szukaj", method = RequestMethod.POST)
     public List<Advertisement> searchAd(HttpServletRequest request, @RequestBody String query) {
 
         /*{
-	        "query": "96",
+	        "query": "tytul",
 	        "categoryId": "-1" // -1 = brak określonej kategorii
           }*/
 
         long category_id = -1;
-        Optional<Category> category = Optional.empty();
 
+            List<Category> categories = null;
         try {
             JSONParser parser = new JSONParser(query);
             LinkedHashMap<String, Object> qJson = parser.parseObject();
@@ -157,12 +160,14 @@ public class AdvertisementController {
 
             category_id = (qJson.get("categoryId") == null) ? -1 : Long.parseLong((String) qJson.get("categoryId"));
             if (category_id > 0)
-                category = categoryDAO.findById(category_id);
+                categories =  categoryDAO.findAllById(Collections.singleton(category_id));
 
-            if (category.isPresent() && category != null) {
-                return advertisementDAO.findByTitleContainingAndCategory(q, category);
-            } else {
+            categories = getSubcategories(categories,categories);
+
+            if (categories.isEmpty() || categories == null){
                 return advertisementDAO.findByTitleContaining(q);
+            }else {
+                return advertisementDAO.findByTitleContainingAndCategoryIn(q,categories);
             }
 
         } catch (Exception e) {
@@ -170,6 +175,20 @@ public class AdvertisementController {
         }
     }
 
+    /**
+     * Metoda rekurencyjna pozwalająca pobrać listę wszystkich podkategorii
+     * @param allCategories lista wszystkich dotychczas pobranych kategorii
+     * @param lowestLevel lisa kategorii najniższego poziomu w iteracji
+     * @return lista wszystkich podkategorii
+     */
+    public List<Category> getSubcategories(List<Category> allCategories, List<Category> lowestLevel ){
+
+        List<Category> result =  categoryDAO.findByParentIn(lowestLevel);
+        if (result.isEmpty())
+            return allCategories;
+        allCategories.addAll(result);
+        return  getSubcategories(allCategories, result);
+    }
 
     /**
      * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt

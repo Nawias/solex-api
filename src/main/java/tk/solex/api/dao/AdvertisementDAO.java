@@ -11,4 +11,6 @@ public interface AdvertisementDAO extends JpaRepository <Advertisement,Long> {
 
     List<Advertisement> findByTitleContaining(String title);
     List<Advertisement> findByTitleContainingAndCategory(String title, Optional<Category> category);
+    List<Advertisement> findByTitleContainingAndCategoryIn(String title, List<Category> category);
+
 }
