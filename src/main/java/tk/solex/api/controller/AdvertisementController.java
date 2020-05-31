@@ -61,10 +61,9 @@ public class AdvertisementController {
 
     /**
      * Metoda pozwalająca na edytowanie istniejącego ogłoszenia
-     *
      * @param request
-     * @param model   JSON zawierający zedytowane dane ogłoszenia
-     * @param files   pliki zawierające zdjęcia do ogłoszenia
+     * @param model JSON zawierający zedytowane dane ogłoszenia
+     * @param files pliki zawierające zdjęcia do ogłoszenia
      * @return Komunikat informujący czy udało się przeprowadzić edycję
      * @throws IOException
      */
@@ -90,7 +89,6 @@ public class AdvertisementController {
 
     /**
      * Metoda usuwająca stare zdjęcia z ogłoszenia
-     *
      * @param photos nazwy plików ze zdjęciami
      * @throws IOException
      */
@@ -109,10 +107,10 @@ public class AdvertisementController {
 
     /**
      * Metoda pozwalająca na dodanie nowego ogłoszenia
-     *
+
      * @param request
-     * @param model   JSON zawierający dane potrzebne do utworzenia nowego ogłoszenia
-     * @param files   pliki ze zdjęciami do ogłoszenia
+     * @param model JSON zawierający dane potrzebne do utworzenia nowego ogłoszenia
+     * @param files pliki ze zdjęciami do ogłoszenia
      * @return Komunikat informujacy czy udało się dodać nowe ogłosznie
      * @throws IOException Wyjątek związany z przesyłaniem plików
      */
@@ -135,6 +133,7 @@ public class AdvertisementController {
     }
 
     /**
+
      * Metoda odpowiedzialna za obsługę wyszukiwarki ogłoszeń
      * @param request request
      * @param query JSON zawierający pola "query" czyli szukaną frazę oraz "categoryId"
@@ -193,6 +192,9 @@ public class AdvertisementController {
     /**
      * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
      *
+
+     * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
+
      * @param model JSON zawierający ogłoszenie
      * @return obiekt zawierający ogłoszenie
      * @throws JsonProcessingException
@@ -204,13 +206,15 @@ public class AdvertisementController {
 
     /**
      * Metoda zwracająca przesłane zdjęcia
-     *
+
      * @param files pliki zawierające zdjęcia ogłoszenia
      * @return pliki ze zdjęciami
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
+
     private String uploadPhotos(MultipartFile[] files) throws IOException, NoSuchAlgorithmException {
+
         String photos = "[";
         for (MultipartFile file : files) {
             if (photos.equals("["))
@@ -224,7 +228,6 @@ public class AdvertisementController {
 
     /**
      * Metoda zwracająca aktualnie zalogowanego użytkownika.
-     *
      * @param request
      * @return aktualnie zalogowany użytkownik
      */
@@ -236,7 +239,6 @@ public class AdvertisementController {
 
     /**
      * Metoda zwracająca kategorię na podstawie id kategori zawartego w JSON
-     *
      * @param model
      * @return obiekt odpowiedniej kategorii
      */
