@@ -21,11 +21,11 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Optional;
+import java.util.*;
+
 
 @RestController
+@RequestMapping("/api")
 public class AdvertisementController {
 
     @Autowired
@@ -39,7 +39,6 @@ public class AdvertisementController {
     private CategoryDAO categoryDAO;
 
     /**
-     *
      * @return
      */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
@@ -49,16 +48,15 @@ public class AdvertisementController {
     }
 
     /**
-     *
      * @param id
      * @return
      */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @GetMapping("/edytuj-ogloszenie")
     public String editAd(@RequestParam Long id) {
-        return "<html><h1>Edit Ad Page</h1><body>"+
+        return "<html><h1>Edit Ad Page</h1><body>" +
                 advertisementDAO.findById(id).get().toString()
-                +"</body></html>";
+                + "</body></html>";
     }
 
     /**
@@ -71,8 +69,7 @@ public class AdvertisementController {
      */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @PutMapping("/edytuj-ogloszenie")
-    public String editAd(HttpServletRequest request, @RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException
-    {
+    public String editAd(HttpServletRequest request, @RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException {
         Advertisement advertisement = getAdvertisementFromModel(model);
         Advertisement oldAd = advertisementDAO.getOne(advertisement.getId());
         advertisement.setDateTime(oldAd.getDateTime());
@@ -104,12 +101,13 @@ public class AdvertisementController {
             e.printStackTrace();
         }
         for (Object file : messageJson) {
-            fileStorageService.delete((String)file);
+            fileStorageService.delete((String) file);
         }
     }
 
     /**
      * Metoda pozwalająca na dodanie nowego ogłoszenia
+
      * @param request
      * @param model JSON zawierający dane potrzebne do utworzenia nowego ogłoszenia
      * @param files pliki ze zdjęciami do ogłoszenia
@@ -118,7 +116,7 @@ public class AdvertisementController {
      */
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @ResponseBody
-    @RequestMapping(value = "/nowe-ogloszenie",method = RequestMethod.POST, consumes = {"multipart/form-data"})
+    @RequestMapping(value = "/nowe-ogloszenie", method = RequestMethod.POST, consumes = {"multipart/form-data"})
     public String newAd(HttpServletRequest request, @RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException {
         Advertisement advertisement = getAdvertisementFromModel(model);
         try {
@@ -135,7 +133,68 @@ public class AdvertisementController {
     }
 
     /**
+
+     * Metoda odpowiedzialna za obsługę wyszukiwarki ogłoszeń
+     * @param request request
+     * @param query JSON zawierający pola "query" czyli szukaną frazę oraz "categoryId"
+     * @return Lista znalezionych ogłoszeń
+     */
+    @ResponseBody
+    @RequestMapping(value = "/szukaj", method = RequestMethod.POST)
+    public List<Advertisement> searchAd(HttpServletRequest request, @RequestBody String query) {
+
+        /*{
+	        "query": "tytul",
+	        "categoryId": "-1" // -1 = brak określonej kategorii
+          }*/
+
+        long category_id = -1;
+
+            List<Category> categories = null;
+        try {
+            JSONParser parser = new JSONParser(query);
+            LinkedHashMap<String, Object> qJson = parser.parseObject();
+
+            String q = (String) qJson.get("query");
+
+            category_id = (qJson.get("categoryId") == null) ? -1 : Long.parseLong((String) qJson.get("categoryId"));
+            if (category_id > 0)
+                categories =  categoryDAO.findAllById(Collections.singleton(category_id));
+
+            categories = getSubcategories(categories,categories);
+
+            if (categories.isEmpty() || categories == null){
+                return advertisementDAO.findByTitleContaining(q);
+            }else {
+                return advertisementDAO.findByTitleContainingAndCategoryIn(q,categories);
+            }
+
+        } catch (Exception e) {
+            return new ArrayList<Advertisement>();
+        }
+    }
+
+    /**
+     * Metoda rekurencyjna pozwalająca pobrać listę wszystkich podkategorii
+     * @param allCategories lista wszystkich dotychczas pobranych kategorii
+     * @param lowestLevel lisa kategorii najniższego poziomu w iteracji
+     * @return lista wszystkich podkategorii
+     */
+    public List<Category> getSubcategories(List<Category> allCategories, List<Category> lowestLevel ){
+
+        List<Category> result =  categoryDAO.findByParentIn(lowestLevel);
+        if (result.isEmpty())
+            return allCategories;
+        allCategories.addAll(result);
+        return  getSubcategories(allCategories, result);
+    }
+
+    /**
      * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
+     *
+
+     * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
+
      * @param model JSON zawierający ogłoszenie
      * @return obiekt zawierający ogłoszenie
      * @throws JsonProcessingException
@@ -147,18 +206,21 @@ public class AdvertisementController {
 
     /**
      * Metoda zwracająca przesłane zdjęcia
+
      * @param files pliki zawierające zdjęcia ogłoszenia
      * @return pliki ze zdjęciami
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    private String uploadPhotos(MultipartFile[] files)throws IOException,NoSuchAlgorithmException{
+
+    private String uploadPhotos(MultipartFile[] files) throws IOException, NoSuchAlgorithmException {
+
         String photos = "[";
-        for(MultipartFile file : files) {
-            if(photos.equals("["))
+        for (MultipartFile file : files) {
+            if (photos.equals("["))
                 photos += "\"" + fileStorageService.upload(file) + "\"";
             else
-                photos += ", \"" + fileStorageService.upload(file)+ "\"";
+                photos += ", \"" + fileStorageService.upload(file) + "\"";
         }
         photos += "]";
         return photos;
@@ -182,13 +244,15 @@ public class AdvertisementController {
      */
     private Category getCategoryFromJson(@RequestParam("model") String model) {
         JSONParser parser = new JSONParser(model);
-        LinkedHashMap<String,Object> messageJson = null;
+        LinkedHashMap<String, Object> messageJson = null;
         try {
             messageJson = parser.parseObject();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        BigInteger id = (BigInteger)messageJson.get("categoryId");
+        BigInteger id = (BigInteger) messageJson.get("categoryId");
         return categoryDAO.getOne(id.longValue());
     }
+
+
 }

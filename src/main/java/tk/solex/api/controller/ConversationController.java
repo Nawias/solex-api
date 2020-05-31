@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api")
 public class ConversationController {
     @Autowired
     MessageDAO messageDAO;
