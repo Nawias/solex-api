@@ -29,7 +29,7 @@ public class UserController {
     public String addUser(@RequestBody User user) {
         System.out.println(user.toString());
         user.setSignupDateTime(new Date());
-        user.setRole(roleDAO.findRoleByName("USER"));
+        user.setRole(roleDAO.findByName("USER").get());
         dao.save(user);
         return "User "+user.getUsername()+" saved";
     }
@@ -38,8 +38,8 @@ public class UserController {
      * Metoda zwracająca wszystkich użytkowników
      * @return Dane wszystkich użytkowników zapisanych w bazie
      */
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("/secured/getAll")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/getAll")
     public List<User> getUsers() {
         return (List<User>) dao.findAll();
     }
