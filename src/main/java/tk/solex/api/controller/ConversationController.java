@@ -44,7 +44,7 @@ public class ConversationController {
      * @param request
      * @return komunikat informujący czy udało się utworzyć nową konwersację
      */
-    @PreAuthorize("hasAnyRole('USER,'ADMIN'')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/nowa-konwersacja")
     public String newConversation(@RequestBody String json, HttpServletRequest request) {
         try {
@@ -68,7 +68,7 @@ public class ConversationController {
      * @param request
      * @return komunikat informujący czy udało się wysłać wiadomość
      */
-    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/nowa-wiadomosc")
     public String newMessage(@RequestBody String json, HttpServletRequest request) {
 
