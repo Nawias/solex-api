@@ -61,9 +61,10 @@ public class AdvertisementController {
 
     /**
      * Metoda pozwalająca na edytowanie istniejącego ogłoszenia
+     *
      * @param request
-     * @param model JSON zawierający zedytowane dane ogłoszenia
-     * @param files pliki zawierające zdjęcia do ogłoszenia
+     * @param model   JSON zawierający zedytowane dane ogłoszenia
+     * @param files   pliki zawierające zdjęcia do ogłoszenia
      * @return Komunikat informujący czy udało się przeprowadzić edycję
      * @throws IOException
      */
@@ -89,6 +90,7 @@ public class AdvertisementController {
 
     /**
      * Metoda usuwająca stare zdjęcia z ogłoszenia
+     *
      * @param photos nazwy plików ze zdjęciami
      * @throws IOException
      */
@@ -107,10 +109,10 @@ public class AdvertisementController {
 
     /**
      * Metoda pozwalająca na dodanie nowego ogłoszenia
-
+     *
      * @param request
-     * @param model JSON zawierający dane potrzebne do utworzenia nowego ogłoszenia
-     * @param files pliki ze zdjęciami do ogłoszenia
+     * @param model   JSON zawierający dane potrzebne do utworzenia nowego ogłoszenia
+     * @param files   pliki ze zdjęciami do ogłoszenia
      * @return Komunikat informujacy czy udało się dodać nowe ogłosznie
      * @throws IOException Wyjątek związany z przesyłaniem plików
      */
@@ -133,68 +135,57 @@ public class AdvertisementController {
     }
 
     /**
-
      * Metoda odpowiedzialna za obsługę wyszukiwarki ogłoszeń
+     *
      * @param request request
-     * @param query JSON zawierający pola "query" czyli szukaną frazę oraz "categoryId"
+     * @param query   JSON zawierający pola "query" czyli szukaną frazę oraz "categoryId"
      * @return Lista znalezionych ogłoszeń
      */
     @ResponseBody
-    @RequestMapping(value = "/public/szukaj", method = RequestMethod.POST)
-    public List<Advertisement> searchAd(HttpServletRequest request, @RequestBody String query) {
+    @RequestMapping(value = "/public/szukaj", method = RequestMethod.GET)
+    public List<Advertisement> searchAd(HttpServletRequest request, @RequestParam(required = false,defaultValue = "") String query, @RequestParam(required = false) String catId) {
 
-        /*{
-	        "query": "tytul",
-	        "categoryId": "-1" // -1 = brak określonej kategorii
-          }*/
+        if (catId == null) {
+            return advertisementDAO.findByTitleContaining(query);
 
-        long category_id = -1;
-
+        } else {
+            long categoryId = Long.parseLong(catId);
             List<Category> categories = null;
-        try {
-            JSONParser parser = new JSONParser(query);
-            LinkedHashMap<String, Object> qJson = parser.parseObject();
 
-            String q = (String) qJson.get("query");
+            if (categoryId > 0)
+                categories = categoryDAO.findAllById(Collections.singleton(categoryId));
 
-            category_id = (qJson.get("categoryId") == null) ? -1 : Long.parseLong((String) qJson.get("categoryId"));
-            if (category_id > 0)
-                categories =  categoryDAO.findAllById(Collections.singleton(category_id));
-
-            categories = getSubcategories(categories,categories);
-
-            if (categories.isEmpty() || categories == null){
-                return advertisementDAO.findByTitleContaining(q);
-            }else {
-                return advertisementDAO.findByTitleContainingAndCategoryIn(q,categories);
+            categories = getSubcategories(categories, categories);
+            if (categories.isEmpty() || categories == null) {
+                return advertisementDAO.findByTitleContaining(query);
+            } else {
+                return advertisementDAO.findByTitleContainingAndCategoryIn(query, categories);
             }
-
-        } catch (Exception e) {
-            return new ArrayList<Advertisement>();
         }
     }
 
     /**
      * Metoda rekurencyjna pozwalająca pobrać listę wszystkich podkategorii
+     *
      * @param allCategories lista wszystkich dotychczas pobranych kategorii
-     * @param lowestLevel lisa kategorii najniższego poziomu w iteracji
+     * @param lowestLevel   lisa kategorii najniższego poziomu w iteracji
      * @return lista wszystkich podkategorii
      */
-    public List<Category> getSubcategories(List<Category> allCategories, List<Category> lowestLevel ){
+    public List<Category> getSubcategories(List<Category> allCategories, List<Category> lowestLevel) {
 
-        List<Category> result =  categoryDAO.findByParentIn(lowestLevel);
+        List<Category> result = categoryDAO.findByParentIn(lowestLevel);
         if (result.isEmpty())
             return allCategories;
         allCategories.addAll(result);
-        return  getSubcategories(allCategories, result);
+        return getSubcategories(allCategories, result);
     }
 
     /**
      * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
-     *
-
+     * <p>
+     * <p>
      * Metoda pozwalająca na przetworzenie ogłoszenia zapisanego jako JSON na obiekt
-
+     *
      * @param model JSON zawierający ogłoszenie
      * @return obiekt zawierający ogłoszenie
      * @throws JsonProcessingException
@@ -206,7 +197,7 @@ public class AdvertisementController {
 
     /**
      * Metoda zwracająca przesłane zdjęcia
-
+     *
      * @param files pliki zawierające zdjęcia ogłoszenia
      * @return pliki ze zdjęciami
      * @throws IOException
@@ -228,6 +219,7 @@ public class AdvertisementController {
 
     /**
      * Metoda zwracająca aktualnie zalogowanego użytkownika.
+     *
      * @param request
      * @return aktualnie zalogowany użytkownik
      */
@@ -239,6 +231,7 @@ public class AdvertisementController {
 
     /**
      * Metoda zwracająca kategorię na podstawie id kategori zawartego w JSON
+     *
      * @param model
      * @return obiekt odpowiedniej kategorii
      */
