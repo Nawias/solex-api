@@ -17,7 +17,7 @@ public class CategoryController {
     @Autowired
     private CategoryDAO categoryDAO;
 
-    @GetMapping("/getAllCategories")
+    @GetMapping("/public/getAllCategories")
     public String getAllCategories(){
         List<Category> categories =  categoryDAO.findAll();
 

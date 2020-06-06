@@ -140,7 +140,7 @@ public class AdvertisementController {
      * @return Lista znalezionych ogłoszeń
      */
     @ResponseBody
-    @RequestMapping(value = "/szukaj", method = RequestMethod.POST)
+    @RequestMapping(value = "/public/szukaj", method = RequestMethod.POST)
     public List<Advertisement> searchAd(HttpServletRequest request, @RequestBody String query) {
 
         /*{
