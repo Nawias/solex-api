@@ -23,7 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.*;
 
-
 @RestController
 @RequestMapping("/api")
 public class AdvertisementController {
