@@ -1,8 +1,10 @@
 package tk.solex.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,6 +17,7 @@ public class Advertisement {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private String photos; //JSON

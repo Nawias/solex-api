@@ -1,10 +1,13 @@
 package tk.solex.api.service;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -20,11 +23,11 @@ public class FileStorageService {
     private String path;
 
     public void delete(String fileName) throws IOException {
-        Files.delete( Paths.get(fileName));
+        Files.delete(Paths.get(fileName));
     }
 
     public String upload(MultipartFile file) throws IOException, NoSuchAlgorithmException {
-        if(file.isEmpty()) {
+        if (file.isEmpty()) {
             throw new IOException("File was empty");
         }
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -37,8 +40,21 @@ public class FileStorageService {
 
         InputStream fileStream = file.getInputStream();
 
-        Files.copy(fileStream, Paths.get(path+fileName), StandardCopyOption.REPLACE_EXISTING);
-        return path+fileName;
+        Files.copy(fileStream, Paths.get(path + fileName), StandardCopyOption.REPLACE_EXISTING);
+        return path + fileName;
+    }
+
+    /* public @ResponseBody byte[] getImage() throws IOException {
+
+        InputStream in = getClass()
+                .getResourceAsStream("./resources/images/4E36CE0ACD242CE57F4AC5EA07E89351.jpg");
+
+        return IOUtils.toByteArray(in);
+    }*/
+    public byte[] getImageBytes(String file) throws IOException {
+        File file1 = (Paths.get(path+file).toFile());
+        InputStream in = new FileInputStream(file1);
+        return IOUtils.toByteArray(in);
     }
 
     private static String getFileExtension(MultipartFile file) {
