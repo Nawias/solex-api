@@ -14,12 +14,16 @@ import tk.solex.api.config.jwt.JwtProvider;
 import tk.solex.api.dao.UserDAO;
 import tk.solex.api.message.request.LoginDTO;
 import tk.solex.api.message.response.JwtTokenDTO;
+import tk.solex.api.model.User;
 
 import javax.xml.ws.Response;
 
 @RestController
 @RequestMapping("/api")
 public class LoginController {
+
+    @Autowired
+    UserDAO userDAO;
 
     @Autowired
     JwtProvider provider;
@@ -35,10 +39,10 @@ public class LoginController {
                         loginDTO.getPassword()
                 )
         );
-
+        User user = userDAO.findByUsername(loginDTO.getUsername()).get();
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = provider.generateToken(authentication);
 
-        return ResponseEntity.ok(new JwtTokenDTO(token));
+        return ResponseEntity.ok(new JwtTokenDTO(token, user));
     }
 }
