@@ -18,6 +18,7 @@ import tk.solex.api.model.Category;
 import tk.solex.api.model.User;
 import tk.solex.api.service.FileStorageService;
 
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.Response;
 import java.io.IOException;
@@ -134,6 +135,18 @@ public class AdvertisementController {
 
         advertisementDAO.save(advertisement);
         return "Uploaded";
+    }
+    /**
+     * Metoda zwracająca konkretne ogłoszenie po numerze ID
+     *
+     * @param request request
+     * @param id   Numer ID żądanego ogłoszenia
+     * @return Żądane ogłoszenie
+     */
+    @ResponseBody
+    @RequestMapping(value = "/public/ogloszenie", method = RequestMethod.GET)
+    public ResponseEntity getAdById(HttpServletRequest request, @RequestParam Long id){
+        return ResponseEntity.ok(new AdvertisementDTO(advertisementDAO.findById(id).get()));
     }
 
     /**
