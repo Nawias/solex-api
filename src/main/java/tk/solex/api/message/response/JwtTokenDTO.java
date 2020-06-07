@@ -1,5 +1,6 @@
 package tk.solex.api.message.response;
 
+
 public class JwtTokenDTO {
     private String token;
     private String type = "Bearer";

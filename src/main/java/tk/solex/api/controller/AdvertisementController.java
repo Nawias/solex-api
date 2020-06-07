@@ -5,18 +5,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tk.solex.api.dao.AdvertisementDAO;
 import tk.solex.api.dao.CategoryDAO;
 import tk.solex.api.dao.UserDAO;
+import tk.solex.api.message.response.AdvertisementDTO;
 import tk.solex.api.model.Advertisement;
 import tk.solex.api.model.Category;
 import tk.solex.api.model.User;
 import tk.solex.api.service.FileStorageService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.Response;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
@@ -142,10 +145,14 @@ public class AdvertisementController {
      */
     @ResponseBody
     @RequestMapping(value = "/public/szukaj", method = RequestMethod.GET)
-    public List<Advertisement> searchAd(HttpServletRequest request, @RequestParam(required = false,defaultValue = "") String query, @RequestParam(required = false) String catId) {
+    public ResponseEntity searchAd(HttpServletRequest request, @RequestParam(required = false,defaultValue = "") String query, @RequestParam(required = false) String catId) {
 
         if (catId == null) {
-            return advertisementDAO.findByTitleContaining(query);
+            return ResponseEntity.ok(
+                    advertisementDAO.findByTitleContaining(query)
+                            .stream()
+                            .map(advertisement -> new AdvertisementDTO(advertisement))
+            );
 
         } else {
             long categoryId = Long.parseLong(catId);
@@ -156,9 +163,17 @@ public class AdvertisementController {
 
             categories = getSubcategories(categories, categories);
             if (categories.isEmpty() || categories == null) {
-                return advertisementDAO.findByTitleContaining(query);
+                return ResponseEntity.ok(
+                        advertisementDAO.findByTitleContaining(query)
+                                .stream()
+                                .map(advertisement -> new AdvertisementDTO(advertisement))
+                );
             } else {
-                return advertisementDAO.findByTitleContainingAndCategoryIn(query, categories);
+                return ResponseEntity.ok(
+                        advertisementDAO.findByTitleContainingAndCategoryIn(query, categories)
+                                .stream()
+                                .map(advertisement -> new AdvertisementDTO(advertisement))
+                );
             }
         }
     }
