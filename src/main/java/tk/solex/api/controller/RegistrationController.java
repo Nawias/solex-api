@@ -49,7 +49,7 @@ public class RegistrationController {
                 passwordEncoder.encode(registerDTO.getPassword()),
                 registerDTO.getAddress(),
                 new Date(System.currentTimeMillis()),
-                roleDAO.findByName("USER").get()
+                roleDAO.findByName("ROLE_USER").get()
         );
         userDAO.save(user);
         return ResponseEntity.ok("User registered");
