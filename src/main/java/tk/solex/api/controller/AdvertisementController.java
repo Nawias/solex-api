@@ -23,6 +23,7 @@ import tk.solex.api.service.FileStorageService;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.Response;
 import java.io.IOException;
 import java.io.InputStream;
@@ -198,7 +199,8 @@ public class AdvertisementController {
 
     @GetMapping(value = "/public/resources/images/{path}",
             produces = MediaType.IMAGE_JPEG_VALUE)
-    public @ResponseBody byte[] getImage( @PathVariable String path) throws IOException {
+    public @ResponseBody byte[] getImage(HttpServletResponse response, @PathVariable String path) throws IOException {
+        response.addHeader("Content-Type","image/png");
         return fileStorageService.getImageBytes(path);
     }
 
