@@ -2,9 +2,12 @@ package tk.solex.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +23,10 @@ import tk.solex.api.service.FileStorageService;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.Response;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
@@ -189,6 +194,14 @@ public class AdvertisementController {
                 );
             }
         }
+    }
+
+
+    @GetMapping(value = "/public/resources/images/{path}",
+            produces = MediaType.IMAGE_JPEG_VALUE)
+    public @ResponseBody byte[] getImage(HttpServletResponse response, @PathVariable String path) throws IOException {
+        response.addHeader("Content-Type","image/png");
+        return fileStorageService.getImageBytes(path);
     }
 
     /**
