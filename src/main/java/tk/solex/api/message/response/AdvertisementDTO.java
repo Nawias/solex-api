@@ -30,6 +30,8 @@ public class AdvertisementDTO  {
     private Date dateTime;
     private Category category;
     private AdUserDetails user;
+    private String status;
+
 
     public AdvertisementDTO(Advertisement advertisement) {
         this.id = advertisement.getId();
@@ -40,6 +42,7 @@ public class AdvertisementDTO  {
         this.dateTime = advertisement.getDateTime();
         this.category = advertisement.getCategory();
         this.user = new AdUserDetails(advertisement.getUser());
+        this.status = advertisement.getStatus();
     }
 
     public Long getId() {
@@ -104,5 +107,13 @@ public class AdvertisementDTO  {
 
     public void setUser(AdUserDetails user) {
         this.user = user;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

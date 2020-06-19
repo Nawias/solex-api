@@ -3,7 +3,6 @@ package tk.solex.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,9 @@ import tk.solex.api.model.Category;
 import tk.solex.api.model.User;
 import tk.solex.api.service.FileStorageService;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Response;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
@@ -214,6 +210,28 @@ public class AdvertisementController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @RequestMapping(value = "/accept-ad", method = RequestMethod.PATCH)
+    public ResponseEntity acceptAd(HttpServletRequest request, @RequestBody String model) {
+
+        Advertisement ad = advertisementDAO.findById(getIdFromJson(model)).get();
+        ad.setStatus("OPEN");
+        advertisementDAO.save(ad);
+        return ResponseEntity.ok("updated");
+    }
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @RequestMapping(value = "/close-ad", method = RequestMethod.PATCH)
+    public ResponseEntity closeAd(HttpServletRequest request, @RequestBody String model) {
+
+        Advertisement ad = advertisementDAO.findById(getIdFromJson(model)).get();
+        if(!getUser(request).getRole().getName().equals("ADMIN") && !getUser(request).equals(ad.getUser()))
+            return ResponseEntity.status(401).build();
+        ad.setStatus("CLOSED");
+        advertisementDAO.save(ad);
+        return ResponseEntity.ok("closed");
+    }
+
     @GetMapping(value = "/public/resources/images/{path}",
             produces = MediaType.IMAGE_JPEG_VALUE)
     public @ResponseBody byte[] getImage(HttpServletResponse response, @PathVariable String path) throws IOException {
@@ -302,6 +320,17 @@ public class AdvertisementController {
         }
         BigInteger id = (BigInteger) messageJson.get("categoryId");
         return categoryDAO.getOne(id.longValue());
+    }
+    private Long getIdFromJson(String model) {
+        JSONParser parser = new JSONParser(model);
+        LinkedHashMap<String, Object> messageJson = null;
+        try {
+            messageJson = parser.parseObject();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        BigInteger id = (BigInteger) messageJson.get("id");
+        return id.longValue();
     }
 
 
