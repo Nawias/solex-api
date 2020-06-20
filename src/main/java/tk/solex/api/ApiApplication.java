@@ -20,7 +20,7 @@ public class ApiApplication {
 		return new WebMvcConfigurerAdapter() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOrigins("http://localhost:3000","https://www.solex.tk");
+				registry.addMapping("/**").allowedOrigins("http://localhost:3000","https://www.solex.tk","http://www.solex.tk").allowedMethods("*");
 			}
 		};
 	}

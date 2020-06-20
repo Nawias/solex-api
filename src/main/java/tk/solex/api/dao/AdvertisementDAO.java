@@ -10,9 +10,11 @@ import java.util.Optional;
 
 public interface AdvertisementDAO extends JpaRepository <Advertisement,Long> {
 
+    List<Advertisement> findByUserId(Long id);
     List<Advertisement> findByTitleContaining(String title);
+    List<Advertisement> findByTitleContainingAndStatus(String title, String status);
     List<Advertisement> findByTitleContainingAndCategory(String title, Optional<Category> category);
     List<Advertisement> findByTitleContainingAndCategoryIn(String title, List<Category> category);
-
-
+    List<Advertisement> findByTitleContainingAndCategoryInAndStatus(String title, List<Category> category, String status);
+    List<Advertisement> findByStatus(String status);
 }

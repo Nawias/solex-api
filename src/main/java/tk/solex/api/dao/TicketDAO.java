@@ -6,5 +6,6 @@ import tk.solex.api.model.Ticket;
 import java.util.List;
 
 public interface TicketDAO extends JpaRepository<Ticket,Long> {
-    public List<Ticket> findAllByStatus(String status);
+    public List<Ticket> findAll();
+    public List<Ticket> findByStatusContaining(String status);
 }
