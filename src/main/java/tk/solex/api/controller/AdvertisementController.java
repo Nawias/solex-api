@@ -124,6 +124,7 @@ public class AdvertisementController {
     @ResponseBody
     @RequestMapping(value = "/nowe-ogloszenie", method = RequestMethod.POST, consumes = {"multipart/form-data"})
     public String newAd(HttpServletRequest request, @RequestParam("model") String model, @RequestParam("files") MultipartFile[] files) throws IOException {
+        request.setCharacterEncoding("UTF-8");
         Advertisement advertisement = getAdvertisementFromModel(model);
         try {
             advertisement.setPhotos(uploadPhotos(files));
@@ -198,6 +199,19 @@ public class AdvertisementController {
         }
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/public/podkategorie", method = RequestMethod.GET)
+    public ResponseEntity searchAd(HttpServletRequest request,  @RequestParam String catId) {
+
+        long categoryId = Long.parseLong(catId);
+        List<Category> categories = null;
+
+        if (categoryId > 0)
+            categories = categoryDAO.findAllById(Collections.singleton(categoryId));
+
+        categories = getSubcategories(categories, categories);
+        return ResponseEntity.ok( categories);
+
     @PreAuthorize("hasAnyRole('ADMIN')")
     @ResponseBody
     @RequestMapping(value = "/pending-ads", method = RequestMethod.GET)
@@ -232,7 +246,7 @@ public class AdvertisementController {
         return ResponseEntity.ok("closed");
     }
 
-    @GetMapping(value = "/public/resources/images/{path}",
+        @GetMapping(value = "/public/resources/images/{path}",
             produces = MediaType.IMAGE_JPEG_VALUE)
     public @ResponseBody byte[] getImage(HttpServletResponse response, @PathVariable String path) throws IOException {
         response.addHeader("Content-Type","image/png");
