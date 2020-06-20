@@ -3,7 +3,6 @@ package tk.solex.api.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,9 @@ import tk.solex.api.model.Category;
 import tk.solex.api.model.User;
 import tk.solex.api.service.FileStorageService;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Response;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
@@ -138,6 +134,7 @@ public class AdvertisementController {
         }
         advertisement.setUser(getUser(request));
         advertisement.setCategory(getCategoryFromJson(model));
+        advertisement.setStatus("PENDING");
 
         advertisementDAO.save(advertisement);
         return "Uploaded";
@@ -152,8 +149,13 @@ public class AdvertisementController {
     @ResponseBody
     @RequestMapping(value = "/public/ogloszenie", method = RequestMethod.GET)
     public ResponseEntity getAdById(HttpServletRequest request, @RequestParam Long id){
-        return ResponseEntity.ok(new AdvertisementDTO(advertisementDAO.findById(id).get()));
+        Advertisement ad = advertisementDAO.findById(id).get();
+        if(ad.getStatus() == "PENDING" && getUser(request).getRole().getName() != "ROLE_ADMIN")
+            return ResponseEntity.notFound().build();
+        else
+            return ResponseEntity.ok(new AdvertisementDTO(ad));
     }
+
 
     /**
      * Metoda odpowiedzialna za obsługę wyszukiwarki ogłoszeń
@@ -168,7 +170,7 @@ public class AdvertisementController {
 
         if (catId == null) {
             return ResponseEntity.ok(
-                    advertisementDAO.findByTitleContaining(query)
+                    advertisementDAO.findByTitleContainingAndStatus(query,"OPEN")
                             .stream()
                             .map(advertisement -> new AdvertisementDTO(advertisement))
             );
@@ -183,13 +185,13 @@ public class AdvertisementController {
             categories = getSubcategories(categories, categories);
             if (categories.isEmpty() || categories == null) {
                 return ResponseEntity.ok(
-                        advertisementDAO.findByTitleContaining(query)
+                        advertisementDAO.findByTitleContainingAndStatus(query,"OPEN")
                                 .stream()
                                 .map(advertisement -> new AdvertisementDTO(advertisement))
                 );
             } else {
                 return ResponseEntity.ok(
-                        advertisementDAO.findByTitleContainingAndCategoryIn(query, categories)
+                        advertisementDAO.findByTitleContainingAndCategoryInAndStatus(query, categories, "OPEN")
                                 .stream()
                                 .map(advertisement -> new AdvertisementDTO(advertisement))
                 );
@@ -210,6 +212,38 @@ public class AdvertisementController {
         categories = getSubcategories(categories, categories);
         return ResponseEntity.ok( categories);
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @ResponseBody
+    @RequestMapping(value = "/pending-ads", method = RequestMethod.GET)
+    public ResponseEntity getPendingAds(HttpServletRequest request) {
+        return ResponseEntity.ok(advertisementDAO.findByStatus("PENDING")
+                .stream()
+                .map(advertisement ->
+                    new AdvertisementDTO(advertisement)
+                )
+        );
+    }
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @RequestMapping(value = "/accept-ad", method = RequestMethod.PATCH)
+    public ResponseEntity acceptAd(HttpServletRequest request, @RequestBody String model) {
+
+        Advertisement ad = advertisementDAO.findById(getIdFromJson(model)).get();
+        ad.setStatus("OPEN");
+        advertisementDAO.save(ad);
+        return ResponseEntity.ok("updated");
+    }
+
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @RequestMapping(value = "/close-ad", method = RequestMethod.PATCH)
+    public ResponseEntity closeAd(HttpServletRequest request, @RequestBody String model) {
+
+        Advertisement ad = advertisementDAO.findById(getIdFromJson(model)).get();
+        if(!getUser(request).getRole().getName().equals("ADMIN") && !getUser(request).equals(ad.getUser()))
+            return ResponseEntity.status(401).build();
+        ad.setStatus("CLOSED");
+        advertisementDAO.save(ad);
+        return ResponseEntity.ok("closed");
     }
 
         @GetMapping(value = "/public/resources/images/{path}",
@@ -300,6 +334,17 @@ public class AdvertisementController {
         }
         BigInteger id = (BigInteger) messageJson.get("categoryId");
         return categoryDAO.getOne(id.longValue());
+    }
+    private Long getIdFromJson(String model) {
+        JSONParser parser = new JSONParser(model);
+        LinkedHashMap<String, Object> messageJson = null;
+        try {
+            messageJson = parser.parseObject();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        BigInteger id = (BigInteger) messageJson.get("id");
+        return id.longValue();
     }
 
 
