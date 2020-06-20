@@ -43,15 +43,6 @@ public class AdvertisementController {
     private CategoryDAO categoryDAO;
 
     /**
-     * @return
-     */
-    @PreAuthorize("hasAnyRole('USER,ADMIN')")
-    @GetMapping("/nowe-ogloszenie")
-    public String newAd() {
-        return "<html><h1>New Ad Page</h1></html>";
-    }
-
-    /**
      * @param id
      * @return
      */
@@ -156,6 +147,16 @@ public class AdvertisementController {
             return ResponseEntity.ok(new AdvertisementDTO(ad));
     }
 
+    @PreAuthorize("hasAnyRole('USER,ADMIN')")
+    @ResponseBody
+    @RequestMapping(value = "/moje-ogloszenia",method = RequestMethod.GET)
+    public ResponseEntity getUsersAds(HttpServletRequest request) {
+        return ResponseEntity.ok(
+                advertisementDAO.findByUserId(getUser(request).getId())
+                        .stream()
+                        .map(advertisement -> new AdvertisementDTO(advertisement))
+        );
+    }
 
     /**
      * Metoda odpowiedzialna za obsługę wyszukiwarki ogłoszeń
