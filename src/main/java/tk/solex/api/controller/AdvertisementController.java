@@ -202,7 +202,7 @@ public class AdvertisementController {
     @ResponseBody
     @RequestMapping(value = "/pending-ads", method = RequestMethod.GET)
     public ResponseEntity getPendingAds(HttpServletRequest request) {
-        return ResponseEntity.ok(advertisementDAO.findByStatus("Pending")
+        return ResponseEntity.ok(advertisementDAO.findByStatus("PENDING")
                 .stream()
                 .map(advertisement ->
                     new AdvertisementDTO(advertisement)
