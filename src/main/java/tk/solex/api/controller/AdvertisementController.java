@@ -210,8 +210,8 @@ public class AdvertisementController {
             categories = categoryDAO.findAllById(Collections.singleton(categoryId));
 
         categories = getSubcategories(categories, categories);
-        return ResponseEntity.ok( categories);
-
+        return ResponseEntity.ok(categories);
+    }
     @PreAuthorize("hasAnyRole('ADMIN')")
     @ResponseBody
     @RequestMapping(value = "/pending-ads", method = RequestMethod.GET)
