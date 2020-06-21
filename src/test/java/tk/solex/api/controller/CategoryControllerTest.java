@@ -2,6 +2,7 @@ package tk.solex.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import tk.solex.api.dao.RoleDAO;
 import tk.solex.api.dao.UserDAO;
+import tk.solex.api.message.request.RegisterDTO;
 import tk.solex.api.model.Role;
 import tk.solex.api.model.User;
 
@@ -30,46 +32,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UserControllerTest {
+class CategoryControllerTest {
 
     @Autowired
     MockMvc mockMvc;
 
-    @Autowired
-    UserDAO userDAO;
-
-    @Autowired
-    RoleDAO roleDAO;
-
-
-    @BeforeAll()
-    void createUser() throws Exception {
-        userDAO.save(new User("testmail","testingonlyuser","","",new Date(), roleDAO.findByName("ROLE_USER").get()));
+    @Test
+    void should_getAllCategories() throws Exception {
+        mockMvc.perform(get("/api/public/getAllCategories")).andDo(print()).andExpect(status().isOk());
+    }
+    @Test
+    void should_getAllCategories_onlyMain() throws Exception {
+        mockMvc.perform(get("/api/public/getAllCategories").queryParam("onlyMain","true")).andDo(print()).andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
-    void elevate() throws Exception {
-
-        User user = userDAO.findByUsername("testingonlyuser").get();
-        Role admin = roleDAO.findByName("ROLE_ADMIN").get();
-        mockMvc.perform(put("/api/users/elevate?userId="+user.getId())).andDo(print()).andExpect(status().isOk());
-
-    }
-    @Test
-    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
-    void getAll() throws Exception {
-
-
-        mockMvc.perform(get("/api/users/getAll")).andDo(print()).andExpect(status().isOk());
-
-    }
-
-
-    @AfterAll()
-    void deleteUser() {
-
-        User user = userDAO.findByUsername("testingonlyuser").get();
-        userDAO.delete(user);
+    void should_getCategory() throws Exception {
+        mockMvc.perform(get("/api/public/getCategory").queryParam("id","1")).andDo(print()).andExpect(status().isOk());
     }
 }

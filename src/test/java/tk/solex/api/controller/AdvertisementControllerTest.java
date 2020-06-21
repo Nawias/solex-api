@@ -26,8 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,7 +76,7 @@ public class AdvertisementControllerTest {
         MockMultipartFile photo = new MockMultipartFile("files","passat.png","image/png",content);
 
         try {
-            mockMvc.perform(MockMvcRequestBuilders.multipart("/edytuj-ogloszenie").file(photo).param("model",obj).with(new RequestPostProcessor() {
+            mockMvc.perform(MockMvcRequestBuilders.multipart("/api/edytuj-ogloszenie").file(photo).param("model",obj).with(new RequestPostProcessor() {
                 @Override
                 public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
                     request.setMethod("PUT");
@@ -116,9 +115,49 @@ public class AdvertisementControllerTest {
         MockMultipartFile photo = new MockMultipartFile("files","passat.png","image/png",content);
 
         try {
-            mockMvc.perform(MockMvcRequestBuilders.multipart("/nowe-ogloszenie").file(photo).param("model",obj)).andDo(print()).andExpect(status().isOk());
+            mockMvc.perform(MockMvcRequestBuilders.multipart("/api/nowe-ogloszenie").file(photo).param("model",obj)).andDo(print()).andExpect(status().isOk());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    @Test
+    void should_getAdById() throws Exception {
+        mockMvc.perform(get("/api/public/ogloszenie").queryParam("id",""+advertisementDAO.findAll().get(0).getId())).andDo(print()).andExpect(status().isOk());
+    }
+    @Test
+    void should_searchAd() throws Exception {
+        mockMvc.perform(get("/api/public/szukaj")).andDo(print()).andExpect(status().isOk());
+    }
+
+    @Test
+    void should_searchAd_query() throws Exception {
+        mockMvc.perform(get("/api/public/szukaj").queryParam("query","")).andDo(print()).andExpect(status().isOk());
+    }
+    @Test
+    void should_searchAd_cat() throws Exception {
+        mockMvc.perform(get("/api/public/szukaj").queryParam("catId","11")).andDo(print()).andExpect(status().isOk());
+    }
+
+    @Test
+    void should_searchAd_query_cat() throws Exception {
+        mockMvc.perform(get("/api/public/szukaj").queryParam("catId","11").queryParam("query","")).andDo(print()).andExpect(status().isOk());
+    }
+    @Test
+    void should_getSubCategories() throws Exception {
+        mockMvc.perform(get("/api/public/podkategorie").queryParam("catId","1")).andDo(print()).andExpect(status().isOk());
+    }
+    @Test
+    @WithMockUser(username = "admin",password = "admin",roles = "ADMIN")
+    void should_getMyAds() throws Exception {
+        mockMvc.perform(get("/api/moje-ogloszenia")).andDo(print()).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "admin",password = "admin",roles = "ADMIN")
+    void should_getPending() throws Exception {
+        mockMvc.perform(get("/api/pending-ads")).andDo(print()).andExpect(status().isOk());
+    }
+
+
+
 }

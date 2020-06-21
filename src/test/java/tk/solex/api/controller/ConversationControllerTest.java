@@ -43,7 +43,7 @@ public class ConversationControllerTest {
     @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
     void newConversation() throws Exception {
         mockMvc.perform(
-            post("/nowa-konwersacja")
+            post("/api/nowa-konwersacja")
                 .content("{\"advertisement_id\":\"0\"}")
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -55,7 +55,7 @@ public class ConversationControllerTest {
     @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
     void newMessage() throws Exception {
         mockMvc.perform(
-            post("/nowa-wiadomosc")
+            post("/api/nowa-wiadomosc")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"conversation_id\":\"0\",\"body\":\"Wiadomość testowa\"}")
             )

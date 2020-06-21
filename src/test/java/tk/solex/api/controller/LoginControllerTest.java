@@ -2,6 +2,7 @@ package tk.solex.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import tk.solex.api.dao.RoleDAO;
 import tk.solex.api.dao.UserDAO;
+import tk.solex.api.message.request.LoginDTO;
+import tk.solex.api.message.request.RegisterDTO;
 import tk.solex.api.model.Role;
 import tk.solex.api.model.User;
 
@@ -30,7 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UserControllerTest {
+class LoginControllerTest {
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     MockMvc mockMvc;
@@ -43,33 +49,36 @@ class UserControllerTest {
 
 
     @BeforeAll()
-    void createUser() throws Exception {
-        userDAO.save(new User("testmail","testingonlyuser","","",new Date(), roleDAO.findByName("ROLE_USER").get()));
+    void createUser() throws  Exception {
+        RegisterDTO registerDTO = new RegisterDTO();
+        registerDTO.setAddress("TESTADDRESS");
+        registerDTO.setEmail("TESTEMAIL222333");
+        registerDTO.setUsername("TESTUSERNAME12345");
+        registerDTO.setPassword("12345");
+        registerDTO.setPhone("123456789");
+        mockMvc.perform(post("/api/register")
+                .content(objectMapper.writeValueAsString(registerDTO))
+                .contentType("application/json"))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
-    void elevate() throws Exception {
-
-        User user = userDAO.findByUsername("testingonlyuser").get();
-        Role admin = roleDAO.findByName("ROLE_ADMIN").get();
-        mockMvc.perform(put("/api/users/elevate?userId="+user.getId())).andDo(print()).andExpect(status().isOk());
-
+    void should_login() throws  Exception {
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setUsername("TESTUSERNAME12345");
+        loginDTO.setPassword("12345");
+        mockMvc.perform(post("/api/login")
+                .content(objectMapper.writeValueAsString(loginDTO))
+                .contentType("application/json"))
+                .andDo(print())
+                .andExpect(status().is(200));
     }
-    @Test
-    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
-    void getAll() throws Exception {
-
-
-        mockMvc.perform(get("/api/users/getAll")).andDo(print()).andExpect(status().isOk());
-
-    }
-
 
     @AfterAll()
     void deleteUser() {
 
-        User user = userDAO.findByUsername("testingonlyuser").get();
+        User user = userDAO.findByUsername("TESTUSERNAME12345").get();
         userDAO.delete(user);
     }
 }

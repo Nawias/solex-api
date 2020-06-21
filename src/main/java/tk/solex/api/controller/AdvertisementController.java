@@ -49,9 +49,7 @@ public class AdvertisementController {
     @PreAuthorize("hasAnyRole('USER,ADMIN')")
     @GetMapping("/edytuj-ogloszenie")
     public String editAd(@RequestParam Long id) {
-        return "<html><h1>Edit Ad Page</h1><body>" +
-                advertisementDAO.findById(id).get().toString()
-                + "</body></html>";
+        return advertisementDAO.findById(id).get().toString();
     }
 
     /**
@@ -240,7 +238,7 @@ public class AdvertisementController {
     public ResponseEntity closeAd(HttpServletRequest request, @RequestBody String model) {
 
         Advertisement ad = advertisementDAO.findById(getIdFromJson(model)).get();
-        if(!getUser(request).getRole().getName().equals("ADMIN") && !getUser(request).equals(ad.getUser()))
+        if(!(getUser(request).getRole().getName().equals("ROLE_ADMIN")) && !getUser(request).equals(ad.getUser()))
             return ResponseEntity.status(401).build();
         ad.setStatus("CLOSED");
         advertisementDAO.save(ad);
