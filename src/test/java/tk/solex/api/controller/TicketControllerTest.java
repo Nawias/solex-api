@@ -56,9 +56,18 @@ public class TicketControllerTest {
     @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
     void should_closeTicket() throws Exception {
         mockMvc.perform(
-                    patch("/api/zamknij-zgloszenie")
+                patch("/api/zamknij-zgloszenie")
                         .param("id",""+this.ticket.getId())
-                    )
+        )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+    @Test
+    @WithMockUser(username = "admin", password = "admin", roles = "ADMIN")
+    void should_getTickets() throws Exception {
+        mockMvc.perform(
+                get("/api/zgloszenia")
+        )
                 .andDo(print())
                 .andExpect(status().isOk());
     }
